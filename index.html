@@ -1,23 +1,110 @@
 
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Beranda Website</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiniCraft Game</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #eef2f3; }
-    h1 { color: #2d3e50; }
-    ul { padding-left: 20px; }
-    a { color: #007BFF; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    body { margin: 0; overflow: hidden; background: #222; }
+    canvas { display: block; }
   </style>
 </head>
 <body>
-  <h1>Selamat Datang di Website Saya</h1>
-  <p>Berikut artikel yang tersedia:</p>
-  <ul>
-    <li><a href="analisis-kebun-kelapa.html">Analisis Usaha Kebun Kelapa</a></li>
-  </ul>
+<script>
+// MiniCraft versi Upgrade
+// Fitur: Gerak, hancurkan blok, tempatkan blok, tampilan UI sederhana
+
+const canvas = document.createElement('canvas');
+const ctx = canvas.getContext('2d');
+document.body.appendChild(canvas);
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const TILE_SIZE = 40;
+const MAP_WIDTH = Math.floor(canvas.width / TILE_SIZE);
+const MAP_HEIGHT = Math.floor(canvas.height / TILE_SIZE);
+
+const player = {
+  x: Math.floor(MAP_WIDTH / 2),
+  y: Math.floor(MAP_HEIGHT / 2),
+  color: 'red'
+};
+
+const blocks = ['grass', 'dirt', 'stone'];
+const colors = {
+  grass: 'green',
+  dirt: '#8B4513',
+  stone: 'gray'
+};
+let selectedBlock = 'grass';
+
+let map = [];
+for (let y = 0; y < MAP_HEIGHT; y++) {
+  let row = [];
+  for (let x = 0; x < MAP_WIDTH; x++) {
+    let blockType = blocks[Math.floor(Math.random() * blocks.length)];
+    row.push(blockType);
+  }
+  map.push(row);
+}
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowUp' && player.y > 0) player.y--;
+  if (e.key === 'ArrowDown' && player.y < MAP_HEIGHT - 1) player.y++;
+  if (e.key === 'ArrowLeft' && player.x > 0) player.x--;
+  if (e.key === 'ArrowRight' && player.x < MAP_WIDTH - 1) player.x++;
+  if (e.key === '1') selectedBlock = 'grass';
+  if (e.key === '2') selectedBlock = 'dirt';
+  if (e.key === '3') selectedBlock = 'stone';
+});
+
+canvas.addEventListener('mousedown', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = Math.floor((e.clientX - rect.left) / TILE_SIZE);
+  const my = Math.floor((e.clientY - rect.top) / TILE_SIZE);
+  if (map[my] && map[my][mx] !== undefined) {
+    if (e.button === 0) {
+      map[my][mx] = null; // Hancurkan blok
+    } else if (e.button === 2) {
+      map[my][mx] = selectedBlock; // Tempatkan blok
+    }
+  }
+});
+
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+function drawUI() {
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, 180, 50);
+  ctx.fillStyle = 'white';
+  ctx.font = '16px sans-serif';
+  ctx.fillText(`Block: ${selectedBlock}`, 10, 30);
+  ctx.fillText(`1-Grass 2-Dirt 3-Stone`, 10, 45);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let y = 0; y < MAP_HEIGHT; y++) {
+    for (let x = 0; x < MAP_WIDTH; x++) {
+      let block = map[y][x];
+      if (block) {
+        ctx.fillStyle = colors[block];
+        ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      } else {
+        ctx.strokeStyle = '#ccc';
+        ctx.strokeRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      }
+    }
+  }
+
+  ctx.fillStyle = player.color;
+  ctx.fillRect(player.x * TILE_SIZE, player.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
+  drawUI();
+  requestAnimationFrame(draw);
+}
+
+draw();
+</script>
 </body>
 </html>
